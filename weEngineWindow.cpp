@@ -1,6 +1,12 @@
 #include "weEngineWindow.hpp"
 #include "stdexcept"
 
+/*
+* weEngineWindow implementation. Contains a glfw window for the engine to use
+* 
+* author: Amine Halimi
+*/
+
 namespace weEngine {
 	weEngineWindow::weEngineWindow(int width, int height, std::string name): widthWindow{width}, heightWindow{height}, windowTitle{name}
 	{
@@ -13,6 +19,9 @@ namespace weEngine {
 		glfwTerminate();
 	}
 
+	/*
+	* Initialize a glfw window pointer
+	*/
 	void weEngineWindow::initWindow()
 	{
 		glfwInit();
@@ -23,6 +32,9 @@ namespace weEngine {
 		window = glfwCreateWindow(widthWindow, heightWindow, windowTitle.c_str(), nullptr, nullptr);
 	}
 
+	/*
+	* Create a window surface for a given vulkan instance
+	*/
 	void weEngineWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
 	{
 		if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS)

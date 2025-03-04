@@ -7,6 +7,12 @@
 #include "iostream"
 #include "cassert"
 
+/*
+* Has the implementation of weEnginePipeline. weEnginePipeline describes the behavior of the graphics pipeline.
+* 
+* author: Amine Halimi
+*/
+
 namespace weEngine
 {
 	weEnginePipeline::weEnginePipeline(
@@ -80,7 +86,7 @@ namespace weEngine
 		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 		shaderStages[0].module = vertShaderModule;
-		shaderStages[0].pName = "main";
+		shaderStages[0].pName = "main"; //Name of the main function
 		shaderStages[0].flags = 0;
 		shaderStages[0].pNext = nullptr;
 		shaderStages[0].pSpecializationInfo = nullptr;
@@ -97,11 +103,12 @@ namespace weEngine
 
 		auto bindingDescriptions = weEngineModel::Vertex::getBindingDescriptions();
 		auto attributeDescriptions = weEngineModel::Vertex::getAttributeDescriptions();
+		
 		//Tells vulkan how to read the vertex input buffer
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()); //From Vertex struct
+		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size()); //From Vertex struct
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 		vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
@@ -130,7 +137,9 @@ namespace weEngine
 			throw std::runtime_error("Failed to create Graphics Pipeline.");
 		}
 	}
-
+	/*
+	* Creates a shader module for a given shader
+	*/
 	void weEnginePipeline::createShaderModule(std::vector<char>& code, VkShaderModule* shaderModule)
 	{
 		VkShaderModuleCreateInfo createInfo{};
@@ -144,6 +153,9 @@ namespace weEngine
 		}
 	}
 
+	/*
+	* Sets up the passed reference of a pipeline config information object
+	*/
 	void weEnginePipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo, uint32_t width, uint32_t height)
 	{
 
@@ -213,7 +225,7 @@ namespace weEngine
 		configInfo.colorBlendInfo.blendConstants[2] = 0.0f;  // Optional
 		configInfo.colorBlendInfo.blendConstants[3] = 0.0f;  // Optional
 
-		//Controls how the depth test
+		//Controls how the depth test and the stencil test are done
 		configInfo.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		configInfo.depthStencilInfo.depthTestEnable = VK_TRUE;
 		configInfo.depthStencilInfo.depthWriteEnable = VK_TRUE;
@@ -227,6 +239,7 @@ namespace weEngine
 
 	}
 
+	//Binds the command buffer to the pipeline
 	void weEnginePipeline::bind(VkCommandBuffer commandBuffer)
 	{
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);

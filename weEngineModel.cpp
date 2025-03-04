@@ -40,14 +40,16 @@ namespace weEngine
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
 		vkUnmapMemory(weEngineDevice.device(), vertexBufferMemory);
 	}
-
+	/*
+	* Enters the draw command into the commandbuffer
+	*/
 	void weEngineModel::draw(VkCommandBuffer commandBuffer)
 	{
 		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
 	}
 
 	/*
-	* Binds the comm
+	* Binds the command buffer to the model
 	*/
 	void weEngineModel::bind(VkCommandBuffer commandBuffer)
 	{
@@ -55,7 +57,9 @@ namespace weEngine
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 	}
-
+	/*
+	* Describes how the input binding inside the buffer data is formatted
+	*/
 	std::vector<VkVertexInputBindingDescription> weEngineModel::Vertex::getBindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescription(1);
@@ -65,6 +69,10 @@ namespace weEngine
 
 		return bindingDescription;
 	}
+	/*
+	* Describes how the attributes stored in the input binding 
+	*/
+
 	std::vector<VkVertexInputAttributeDescription> weEngineModel::Vertex::getAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescription(1);

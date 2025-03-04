@@ -7,7 +7,7 @@
 
 /*
 *
-* Main.cpp is the entry point for
+* Main.cpp is the entry point for the program
 *
 * author: Amine Halimi
 */

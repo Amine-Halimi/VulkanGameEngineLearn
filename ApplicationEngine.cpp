@@ -20,7 +20,9 @@ namespace weEngine
 	{
 		vkDestroyPipelineLayout(weEngineDevice.device(), pipelineLayout, nullptr);
 	}
-
+	/*
+	* Main loop of the applcation engine
+	*/
 	void ApplicationEngine::run()
 	{
 		while (!weEngineWindow.shouldClose())
@@ -31,6 +33,10 @@ namespace weEngine
 
 		vkDeviceWaitIdle(weEngineDevice.device()); //Wait for the GPU to finish its operation before closing
 	}
+
+	/*
+	* Creates a pipeline layout for the weEnginePipeline object
+	*/
 
 	void ApplicationEngine::createPipelineLayout()
 	{
@@ -46,6 +52,9 @@ namespace weEngine
 			throw std::runtime_error("Failed to create pipeline layout");
 		}
 	}
+	/*
+	* Creates the weEnginePipeline object
+	*/
 	void ApplicationEngine::createPipeline()
 	{
 		PipelineConfigInfo pipelineConfig{};
@@ -64,6 +73,10 @@ namespace weEngine
 			pipelineConfig);
 	}
 
+	/*
+	* Creates command buffers which hold the vulkan command drawing the fragments.
+	* There are two command buffers made, each for the framebuffer
+	*/
 	void ApplicationEngine::createCommandBuffers()
 	{
 		commandBuffers.resize(weEngineSwapChain.imageCount());
@@ -117,6 +130,10 @@ namespace weEngine
 			}
 		}
 	}
+
+	/*
+	* Draws the frame and acquires the next one.
+	*/
 	void ApplicationEngine::drawFrame()
 	{
 		uint32_t imageIndex;
@@ -134,6 +151,9 @@ namespace weEngine
 		}
 	}
 
+	/*
+	* Creates the engine model
+	*/
 	void ApplicationEngine::loadModels()
 	{
 		std::vector<weEngineModel::Vertex> vertices{
