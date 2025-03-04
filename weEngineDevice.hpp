@@ -38,7 +38,7 @@ namespace weEngine {
 
           // Not copyable or movable
           weEngineDevice(const weEngineDevice &) = delete;
-          void operator=(const weEngineDevice&) = delete;
+          weEngineDevice &operator=(const weEngineDevice&) = delete;
           weEngineDevice(weEngineDevice&&) = delete;
           weEngineDevice &operator=(weEngineDevice&&) = delete;
 

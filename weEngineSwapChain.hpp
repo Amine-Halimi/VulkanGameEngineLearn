@@ -19,7 +19,7 @@ class weEngineSwapChain {
   ~weEngineSwapChain();
 
   weEngineSwapChain(const weEngineSwapChain &) = delete;
-  void operator=(const weEngineSwapChain &) = delete;
+  weEngineSwapChain &operator=(const weEngineSwapChain &) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
