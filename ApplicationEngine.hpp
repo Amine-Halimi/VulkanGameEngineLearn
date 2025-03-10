@@ -7,6 +7,7 @@
 #include "weEngineModel.hpp"
 
 //std
+
 #include "memory"
 #include "vector"
 /*
@@ -34,6 +35,7 @@ namespace weEngine {
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
+		void freeCommandBuffers();
 		void drawFrame();
 		void loadModels();
 		void recreateSwapChain();

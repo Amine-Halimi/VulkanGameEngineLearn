@@ -6,9 +6,16 @@
 #include <vulkan/vulkan.h>
 
 // std lib headers
+#include "memory"
 #include <string>
 #include <vector>
 
+/*
+* Vulkan swapchain object created and modified by the tutorial
+* 
+* author: Brendan Galea
+* 
+*/
 
 
 namespace weEngine {
@@ -18,6 +25,7 @@ class weEngineSwapChain {
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
   weEngineSwapChain(weEngineDevice &deviceRef, VkExtent2D windowExtent);
+  weEngineSwapChain(weEngineDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<weEngineSwapChain> previous);
   ~weEngineSwapChain();
 
   weEngineSwapChain(const weEngineSwapChain &) = delete;
@@ -41,6 +49,7 @@ class weEngineSwapChain {
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
  private:
+  void init();
   void createSwapChain();
   void createImageViews();
   void createDepthResources();
@@ -71,6 +80,8 @@ class weEngineSwapChain {
   VkExtent2D windowExtent;
 
   VkSwapchainKHR swapChain;
+  std::shared_ptr<weEngineSwapChain> oldSwapChain;
+
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;
