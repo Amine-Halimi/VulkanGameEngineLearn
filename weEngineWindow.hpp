@@ -28,13 +28,17 @@ namespace weEngine {
 		};
 		VkExtent2D getExtent() { return { static_cast<uint32_t>(widthWindow), static_cast<uint32_t>(heightWindow) }; };
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+		bool wasWindowResized() { return framebufferResized; };
+		void resetWindowResizedFlags() { framebufferResized = false; };
+
 
 	private:
+		static void framebufferResizedCallback(GLFWwindow* window, int width, int height);
 		void initWindow();
 
-		const int heightWindow;
-		const int widthWindow;
-
+		int heightWindow;
+		int widthWindow;
+		bool framebufferResized = false;
 
 		std::string windowTitle;
 		GLFWwindow* window;

@@ -36,11 +36,12 @@ namespace weEngine {
 		void createCommandBuffers();
 		void drawFrame();
 		void loadModels();
-
+		void recreateSwapChain();
+		void recordCommandBuffer(int imageIndex);
 
 		weEngineWindow weEngineWindow{ WIDTH, HEIGHT, "Hello from Vulkan" };
 		weEngineDevice weEngineDevice{ weEngineWindow };
-		weEngineSwapChain weEngineSwapChain{ weEngineDevice, weEngineWindow.getExtent()};
+		std::unique_ptr<weEngineSwapChain> weEngineSwapChain; // weEngineDevice, weEngineWindow.getExtent()
 		std::unique_ptr<weEnginePipeline> weEnginePipeline;
 
 		VkPipelineLayout pipelineLayout;

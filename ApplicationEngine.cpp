@@ -12,7 +12,7 @@ namespace weEngine
 	{
 		loadModels();
 		createPipelineLayout();
-		createPipeline();
+		recreateSwapChain();
 		createCommandBuffers();
 	}
 
@@ -60,10 +60,10 @@ namespace weEngine
 		PipelineConfigInfo pipelineConfig{};
 		weEnginePipeline::defaultPipelineConfigInfo(
 			pipelineConfig,
-			weEngineSwapChain.width(),
-			weEngineSwapChain.height()
+			weEngineSwapChain->width(),
+			weEngineSwapChain->height()
 		);
-		pipelineConfig.renderPass = weEngineSwapChain.getRenderPass();
+		pipelineConfig.renderPass = weEngineSwapChain->getRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;
 
 		weEnginePipeline = make_unique<weEngine::weEnginePipeline>(
@@ -74,12 +74,30 @@ namespace weEngine
 	}
 
 	/*
+	* Waits for the window to end resizing and recreates the swap chain
+	*/
+	void ApplicationEngine::recreateSwapChain()
+	{
+		auto extent = weEngineWindow.getExtent();
+		while (extent.width == 0 || extent.height == 0)
+		{
+			extent = weEngineWindow.getExtent();
+			glfwWaitEvents();
+		}
+
+		vkDeviceWaitIdle(weEngineDevice.device());
+
+		weEngineSwapChain = std::make_unique<weEngine::weEngineSwapChain>(weEngineDevice, extent);
+		createPipeline();
+	}
+
+	/*
 	* Creates command buffers which hold the vulkan command drawing the fragments.
 	* There are two command buffers made, each for the framebuffer
 	*/
 	void ApplicationEngine::createCommandBuffers()
 	{
-		commandBuffers.resize(weEngineSwapChain.imageCount());
+		commandBuffers.resize(weEngineSwapChain->imageCount());
 		
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -92,6 +110,7 @@ namespace weEngine
 			throw std::runtime_error("Failed to allocate command buffers layout");
 		}
 
+		/*
 		for (int i = 0; i < commandBuffers.size(); i++)
 		{
 			VkCommandBufferBeginInfo beginInfo{};
@@ -104,11 +123,11 @@ namespace weEngine
 
 			VkRenderPassBeginInfo renderPassInfo{};
 			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			renderPassInfo.renderPass = weEngineSwapChain.getRenderPass();
-			renderPassInfo.framebuffer = weEngineSwapChain.getFrameBuffer(i);
+			renderPassInfo.renderPass = weEngineSwapChain->getRenderPass();
+			renderPassInfo.framebuffer = weEngineSwapChain->getFrameBuffer(i);
 			
 			renderPassInfo.renderArea.offset = { 0, 0 };
-			renderPassInfo.renderArea.extent = weEngineSwapChain.getSwapChainExtent();
+			renderPassInfo.renderArea.extent = weEngineSwapChain->getSwapChainExtent();
 
 			std::array<VkClearValue, 2> clearValues{};
 			clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f }; //Color buffer
@@ -129,6 +148,48 @@ namespace weEngine
 				throw std::runtime_error("Failed to end recording command buffer");
 			}
 		}
+		*/
+	}
+
+	/*
+	* Adds commands to the command buffer in the given index
+	*/
+	void ApplicationEngine::recordCommandBuffer(int imageIndex)
+	{
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to begin recording command buffer");
+		}
+
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = weEngineSwapChain->getRenderPass();
+		renderPassInfo.framebuffer = weEngineSwapChain->getFrameBuffer(imageIndex);
+
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = weEngineSwapChain->getSwapChainExtent();
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f }; //Color buffer
+		clearValues[1].depthStencil = { 1.0f, 0 }; //Depth buffer
+
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		weEnginePipeline->bind(commandBuffers[imageIndex]);
+		weEngineModel->bind(commandBuffers[imageIndex]);
+		weEngineModel->draw(commandBuffers[imageIndex]);
+
+		vkCmdEndRenderPass(commandBuffers[imageIndex]);
+		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to end recording command buffer");
+		}
 	}
 
 	/*
@@ -137,14 +198,28 @@ namespace weEngine
 	void ApplicationEngine::drawFrame()
 	{
 		uint32_t imageIndex;
-		auto result = weEngineSwapChain.acquireNextImage(&imageIndex);
+		auto result = weEngineSwapChain->acquireNextImage(&imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			recreateSwapChain();
+			return;
+		}
 
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 		{
 			throw std::runtime_error("Failed to acquire swap chain image");
 		}
 
-		result = weEngineSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+		recordCommandBuffer(imageIndex);
+		result = weEngineSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || weEngineWindow.wasWindowResized())
+		{
+			weEngineWindow.resetWindowResizedFlags();
+			recreateSwapChain();
+			return;
+		}
 		if (result != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to present swap chain image");
