@@ -4,13 +4,13 @@
 #include "weEnginePipeline.hpp"
 #include "weEngineGameObject.hpp"
 #include "weEngineDevice.hpp"
-#include "weEngineSwapChain.hpp"
+#include "weEngineRenderer.hpp"
 #include "weEngineModel.hpp"
 
 //std
-
 #include "memory"
 #include "vector"
+
 /*
 *
 * ApplicationEngine is a class for running the vulkan instance.
@@ -35,21 +35,16 @@ namespace weEngine {
 	private:
 		void createPipelineLayout();
 		void createPipeline();
-		void createCommandBuffers();
-		void freeCommandBuffers();
-		void drawFrame();
 		void loadGameObjects();
-		void recreateSwapChain();
-		void recordCommandBuffer(int imageIndex);
+
 		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		weEngineWindow weEngineWindow{ WIDTH, HEIGHT, "Hello from Vulkan" };
 		weEngineDevice weEngineDevice{ weEngineWindow };
-		std::unique_ptr<weEngineSwapChain> weEngineSwapChain; // weEngineDevice, weEngineWindow.getExtent()
+		weEngineRenderer weEngineRenderer{weEngineWindow, weEngineDevice};
 		std::unique_ptr<weEnginePipeline> weEnginePipeline;
 
 		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffers;
 		std::vector<weEngineGameObject> gameObjects;
 	};
 }

@@ -51,7 +51,7 @@ namespace weEngine
 			return weEngineGameObject(currentId++);
 		}
 
-		const id_t getId()
+		id_t getId() const
 		{
 			return id;
 		}
