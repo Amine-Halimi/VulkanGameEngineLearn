@@ -5,7 +5,6 @@
 #include "array"
 
 //glm
-//glm
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "glm/glm.hpp"
@@ -16,13 +15,14 @@ using std::make_unique;
 namespace weEngine
 {
 	struct SimplePushConstantData {
+		glm::mat2 transform{ 1.0f };
 		glm::vec2 offset;
 		alignas(16) glm::vec3 color;
 	};
 
 	ApplicationEngine::ApplicationEngine()
 	{
-		loadModels();
+		loadGameObjects();
 		createPipelineLayout();
 		recreateSwapChain();
 		createCommandBuffers();
@@ -32,6 +32,30 @@ namespace weEngine
 	{
 		vkDestroyPipelineLayout(weEngineDevice.device(), pipelineLayout, nullptr);
 	}
+
+	/*
+	* Creates the game objects for the app.
+	*/
+	void ApplicationEngine::loadGameObjects()
+	{
+		std::vector<weEngineModel::Vertex> vertices{
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		};
+
+		auto weEngineModel = std::make_shared<weEngine::weEngineModel>(weEngineDevice, vertices);
+
+		auto triangle = weEngineGameObject::createGameObject();
+		triangle.model = weEngineModel;
+		triangle.color = { 0.0f, 0.8f, 0.1f };
+		triangle.transform2d.translation.x = 0.2f;
+		triangle.transform2d.scale = { 2.0f, 0.5f };
+		triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
+
+		gameObjects.push_back(std::move(triangle));
+	}
+
 	/*
 	* Main loop of the applcation engine
 	*/
@@ -163,10 +187,6 @@ namespace weEngine
 	*/
 	void ApplicationEngine::recordCommandBuffer(int imageIndex)
 	{
-		//Adding motion
-		static int frame = 0;
-		frame = (frame + 1) % 1000;
-
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -205,30 +225,37 @@ namespace weEngine
 		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-		weEnginePipeline->bind(commandBuffers[imageIndex]);
-		weEngineModel->bind(commandBuffers[imageIndex]);
-
-		//Loops creating 4 triangles
-		int numOfTriangles = 4;
-		for (int j = 0; j < numOfTriangles; j++)
-		{
-			SimplePushConstantData pushData{};
-			pushData.offset = { -0.5f + frame * 0.002f, -0.4f + j * 0.25f };
-			pushData.color = { 0.0f, 0.0f, 0.2f + j * 0.2f };
-
-			vkCmdPushConstants(commandBuffers[imageIndex],
-				pipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(SimplePushConstantData),
-				&pushData);
-			weEngineModel->draw(commandBuffers[imageIndex]);
-		}
+		renderGameObjects(commandBuffers[imageIndex]);
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to end recording command buffer");
+		}
+	}
+
+	void ApplicationEngine::renderGameObjects(VkCommandBuffer commandBuffer)
+	{
+		weEnginePipeline->bind(commandBuffer);
+
+		for (auto& gameObj : gameObjects)
+		{
+			gameObj.transform2d.rotation = glm::mod(gameObj.transform2d.rotation + 0.01f, glm::two_pi<float>());
+			SimplePushConstantData pushData{};
+			pushData.offset = gameObj.transform2d.translation;
+			pushData.color = gameObj.color;
+			pushData.transform = gameObj.transform2d.mat2();
+
+			vkCmdPushConstants(commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantData),
+				&pushData);
+
+			gameObj.model->bind(commandBuffer);
+			gameObj.model->draw(commandBuffer);
+
 		}
 	}
 
@@ -266,17 +293,5 @@ namespace weEngine
 		}
 	}
 
-	/*
-	* Creates the engine model
-	*/
-	void ApplicationEngine::loadModels()
-	{
-		std::vector<weEngineModel::Vertex> vertices{
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-		};
 
-		weEngineModel = std::make_unique<weEngine::weEngineModel>(weEngineDevice, vertices);
-	}
 }

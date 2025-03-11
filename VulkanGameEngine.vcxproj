@@ -163,6 +163,7 @@ C:\VulkanSDK\1.3.296.0\Bin\glslc.exe shaders\simpleVertexShader.vert -o shaders\
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ApplicationEngine.hpp" />
+    <ClInclude Include="weEngineGameObject.hpp" />
     <ClInclude Include="weEngineModel.hpp" />
     <ClInclude Include="weEngineSwapChain.hpp" />
     <ClInclude Include="weEngineDevice.hpp" />

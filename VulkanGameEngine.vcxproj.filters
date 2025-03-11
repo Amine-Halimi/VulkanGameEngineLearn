@@ -56,6 +56,9 @@
     <ClInclude Include="weEngineModel.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="weEngineGameObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CompileShader.bat">

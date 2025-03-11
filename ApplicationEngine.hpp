@@ -2,6 +2,7 @@
 
 #include "weEngineWindow.hpp"
 #include "weEnginePipeline.hpp"
+#include "weEngineGameObject.hpp"
 #include "weEngineDevice.hpp"
 #include "weEngineSwapChain.hpp"
 #include "weEngineModel.hpp"
@@ -37,9 +38,10 @@ namespace weEngine {
 		void createCommandBuffers();
 		void freeCommandBuffers();
 		void drawFrame();
-		void loadModels();
+		void loadGameObjects();
 		void recreateSwapChain();
 		void recordCommandBuffer(int imageIndex);
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		weEngineWindow weEngineWindow{ WIDTH, HEIGHT, "Hello from Vulkan" };
 		weEngineDevice weEngineDevice{ weEngineWindow };
@@ -48,6 +50,6 @@ namespace weEngine {
 
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;
-		std::unique_ptr<weEngineModel> weEngineModel;
+		std::vector<weEngineGameObject> gameObjects;
 	};
 }
