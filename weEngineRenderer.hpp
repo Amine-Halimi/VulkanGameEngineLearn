@@ -37,12 +37,17 @@ namespace weEngine
 		VkCommandBuffer getCurrentCommandBuffer() const
 		{
 			assert(isFrameStarted && "Cannot retrieve current command buffer since the frame is not in progress");
-			return commandBuffers[currentImageIndex];
+			return commandBuffers[currentFrameIndex];
+		}
+
+		int getCurrentFrameIndex() const
+		{
+			assert(isFrameStarted && "Cannot retrieve currentFrameIndex while the frame is not in progress");
+			return currentFrameIndex;
 		}
 
 		VkCommandBuffer beginFrame();
 		void endFrame();
-
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 	private:
@@ -56,6 +61,7 @@ namespace weEngine
 		std::vector<VkCommandBuffer> commandBuffers;
 
 		uint32_t currentImageIndex;
+		int currentFrameIndex{ 0 };
 		bool isFrameStarted{ false };
 	};
 }

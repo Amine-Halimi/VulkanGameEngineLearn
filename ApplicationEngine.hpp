@@ -1,11 +1,9 @@
 #pragma once
 
 #include "weEngineWindow.hpp"
-#include "weEnginePipeline.hpp"
 #include "weEngineGameObject.hpp"
 #include "weEngineDevice.hpp"
 #include "weEngineRenderer.hpp"
-#include "weEngineModel.hpp"
 
 //std
 #include "memory"
@@ -33,18 +31,11 @@ namespace weEngine {
 
 		void run();
 	private:
-		void createPipelineLayout();
-		void createPipeline();
 		void loadGameObjects();
-
-		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		weEngineWindow weEngineWindow{ WIDTH, HEIGHT, "Hello from Vulkan" };
 		weEngineDevice weEngineDevice{ weEngineWindow };
 		weEngineRenderer weEngineRenderer{weEngineWindow, weEngineDevice};
-		std::unique_ptr<weEnginePipeline> weEnginePipeline;
-
-		VkPipelineLayout pipelineLayout;
 		std::vector<weEngineGameObject> gameObjects;
 	};
 }

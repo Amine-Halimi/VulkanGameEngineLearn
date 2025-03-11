@@ -44,12 +44,14 @@ namespace weEngine
 		}
 		else
 		{
-			weEngineSwapChain = std::make_unique<weEngine::weEngineSwapChain>(weEngineDevice, extent, std::move(weEngineSwapChain));
-			if (weEngineSwapChain->imageCount() != commandBuffers.size())
+			std::shared_ptr<weEngine::weEngineSwapChain> oldSwapChain = std::move(weEngineSwapChain);
+			weEngineSwapChain = std::make_unique<weEngine::weEngineSwapChain>(weEngineDevice, extent, oldSwapChain);
+
+			if (!oldSwapChain->compareSwapFormats(*weEngineSwapChain.get()))
 			{
-				freeCommandBuffers();
-				createCommandBuffers();
+				throw std::runtime_error("Swap chain image for color (or depth) format has changed.");
 			}
+			
 		}
 
 
@@ -63,7 +65,7 @@ namespace weEngine
 	*/
 	void weEngineRenderer::createCommandBuffers()
 	{
-		commandBuffers.resize(weEngineSwapChain->imageCount());
+		commandBuffers.resize(weEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -150,6 +152,7 @@ namespace weEngine
 		}
 
 		isFrameStarted = false;
+		currentFrameIndex = (currentFrameIndex + 1) % weEngineSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
 	/*
