@@ -71,6 +71,7 @@ namespace weEngine {
         vkDestroyFence(device.device(), inFlightFences[i], nullptr);
       }
     }
+
     /*
     * Switches the frame buffer displayed
     */
@@ -93,6 +94,8 @@ namespace weEngine {
 
       return result;
     }
+
+
 
     VkResult weEngineSwapChain::submitCommandBuffers(
         const VkCommandBuffer *buffers, uint32_t *imageIndex) {
@@ -141,8 +144,9 @@ namespace weEngine {
 
       return result;
     }
+
     /*
-    * Get the details of the swapchain supported by the given device
+    * Create the swapchain object by getting the details of the swapchain supported by the given device
     * 
     */
     void weEngineSwapChain::createSwapChain() {
@@ -205,6 +209,7 @@ namespace weEngine {
       swapChainImageFormat = surfaceFormat.format;
       swapChainExtent = extent;
     }
+
 
     void weEngineSwapChain::createImageViews() {
       swapChainImageViews.resize(swapChainImages.size());
@@ -294,7 +299,7 @@ namespace weEngine {
     }
 
     /*
-    * Creates currently two framebuffers for the swapchain to
+    * Creates currently two framebuffers for the swapchain to switch over
     */
     void weEngineSwapChain::createFramebuffers() {
       swapChainFramebuffers.resize(imageCount());

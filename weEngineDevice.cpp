@@ -7,7 +7,7 @@
 #include <unordered_set>
 
 /*
-* Implementation of the weEngineDevice.object provided by the tutorial. Modified to fit with the weEngine 
+* Implementation of the weEngineDevice.object provided by the tutorial. Modified to fit with the weEngine namespace
 * 
 * author: Brendan Galea
 */
@@ -75,7 +75,7 @@ namespace weEngine {
     }
 
     /*
-    * Create a vulkan instance with
+    * Creates a vulkan instance with the supported vulkan extensions
     */
     void weEngineDevice::createInstance() {
       if (enableValidationLayers && !checkValidationLayerSupport()) {
@@ -117,6 +117,9 @@ namespace weEngine {
       hasGflwRequiredInstanceExtensions();
     }
 
+    /*
+    * Fetches the GPUs inside of the machine, checks if it supports Vulkan
+    */
     void weEngineDevice::pickPhysicalDevice() {
       uint32_t deviceCount = 0;
       vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -142,6 +145,9 @@ namespace weEngine {
       std::cout << "physical device: " << properties.deviceName << std::endl;
     }
 
+    /*
+    * 
+    */
     void weEngineDevice::createLogicalDevice() {
       QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -202,7 +208,10 @@ namespace weEngine {
       }
     }
 
-    void weEngineDevice::createSurface() { window.createWindowSurface(instance, &surface_); }
+    void weEngineDevice::createSurface() 
+    { 
+        window.createWindowSurface(instance, &surface_);
+    }
 
     bool weEngineDevice::isDeviceSuitable(VkPhysicalDevice device) {
       QueueFamilyIndices indices = findQueueFamilies(device);
@@ -244,6 +253,9 @@ namespace weEngine {
       }
     }
 
+    /*
+    * Returns true if it finds a validation layer it supports
+    */
     bool weEngineDevice::checkValidationLayerSupport() {
       uint32_t layerCount;
       vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -269,6 +281,9 @@ namespace weEngine {
       return true;
     }
 
+    /*
+    * Returns the vulkan extensions required for vulkan to work
+    */
     std::vector<const char *> weEngineDevice::getRequiredExtensions() {
       uint32_t glfwExtensionCount = 0;
       const char **glfwExtensions;
@@ -282,6 +297,7 @@ namespace weEngine {
 
       return extensions;
     }
+
 
     void weEngineDevice::hasGflwRequiredInstanceExtensions() {
       uint32_t extensionCount = 0;
