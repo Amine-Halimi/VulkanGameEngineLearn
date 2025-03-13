@@ -4,6 +4,7 @@
 #include "weEngineGameObject.hpp"
 #include "weEngineDevice.hpp"
 #include "weEngineRenderer.hpp"
+#include "weEngineCamera.hpp"
 
 //std
 #include "memory"

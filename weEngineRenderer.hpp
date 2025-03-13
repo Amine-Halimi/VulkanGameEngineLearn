@@ -29,6 +29,11 @@ namespace weEngine
 		{
 			return weEngineSwapChain->getRenderPass();
 		}
+
+		float getAspectRatio() const
+		{
+			return weEngineSwapChain->extentAspectRatio();
+		}
 		bool isFrameInProgress() const
 		{
 			return isFrameStarted;

@@ -1,9 +1,9 @@
 #pragma once
-#pragma once
 
 #include "weEnginePipeline.hpp"
 #include "weEngineGameObject.hpp"
 #include "weEngineDevice.hpp"
+#include "weEngineCamera.hpp"
 
 //std
 #include "memory"
@@ -26,7 +26,7 @@ namespace weEngine {
 		SimpleRenderingSystem(const SimpleRenderingSystem&) = delete;
 		SimpleRenderingSystem& operator=(const SimpleRenderingSystem&) = delete;
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<weEngineGameObject>& gameObjects);
+		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<weEngineGameObject>& gameObjects, const weEngineCamera& camera);
 
 	private:
 		void createPipelineLayout();

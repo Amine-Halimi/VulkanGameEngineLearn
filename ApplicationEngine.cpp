@@ -16,6 +16,8 @@ using std::make_unique;
 namespace weEngine
 {
 
+	std::unique_ptr<weEngineModel> createCubeModel(weEngineDevice& device, glm::vec3 offset);
+
 	ApplicationEngine::ApplicationEngine()
 	{
 		loadGameObjects();
@@ -31,14 +33,22 @@ namespace weEngine
 	void ApplicationEngine::run()
 	{
 		SimpleRenderingSystem renderSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass() };
+		weEngineCamera camera{};
+		
 		while (!weEngineWindow.shouldClose())
 		{
 			glfwPollEvents();
+			float screenAspectRatio = weEngineRenderer.getAspectRatio();
+
+			//camera.setViewDirection(glm::vec3{0.0f}, glm::vec3{-0.5f, 0.0f, 1.0f});
+			camera.setViewTarget(glm::vec3{ -1.0f, -2.0f, 2.0f }, gameObjects[0].transformComp.translation);
 			
+			//camera.setOrthographicProjection(-screenAspectRatio, screenAspectRatio, -1, 1, -1, 1);
+			camera.setPerspectiveProjection(glm::radians(50.0f), screenAspectRatio, 0.1f, 10.0f);
 			if (auto commandBuffer = weEngineRenderer.beginFrame())
 			{
 				weEngineRenderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.renderGameObjects(commandBuffer, gameObjects);
+				renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
 				weEngineRenderer.endSwapChainRenderPass(commandBuffer);
 				weEngineRenderer.endFrame();
 			}
@@ -52,24 +62,76 @@ namespace weEngine
 	*/
 	void ApplicationEngine::loadGameObjects()
 	{
-		std::vector<weEngineModel::Vertex> vertices{
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-		};
+		std::shared_ptr<weEngineModel> weEngineModel = createCubeModel(weEngineDevice, { 0.0f, 0.0f, 0.0f });
 
-		auto weEngineModel = std::make_shared<weEngine::weEngineModel>(weEngineDevice, vertices);
+		auto cube = weEngineGameObject::createGameObject();
 
-		auto triangle = weEngineGameObject::createGameObject();
-		triangle.model = weEngineModel;
-		triangle.color = { 0.0f, 0.8f, 0.1f };
-		triangle.transform2d.translation.x = 0.2f;
-		triangle.transform2d.scale = { 2.0f, 0.5f };
-		triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
-
-		gameObjects.push_back(std::move(triangle));
+		cube.model = weEngineModel;
+		cube.transformComp.translation = { 0.0f, 0.0f, 2.5f };
+		cube.transformComp.scale = { 0.5f, 0.5f, 0.5f };
+		
+		gameObjects.push_back(std::move(cube));
 	}
 
+
+	std::unique_ptr<weEngineModel> createCubeModel(weEngineDevice& device, glm::vec3 offset) {
+		std::vector<weEngineModel::Vertex> vertices{
+
+			// left face (white)
+			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+			{{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
+			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+			{{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
+			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+
+			// right face (yellow)
+			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+			{{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
+			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+			{{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+
+			// top face (orange, remember y axis points down)
+			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+			{{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+			{{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+
+			// bottom face (red)
+			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+			{{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
+			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+			{{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+
+			// nose face (blue)
+			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+			{{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+
+			// tail face (green)
+			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+			{{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+			{{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+
+		};
+		for (auto& v : vertices) 
+		{
+			v.position += offset;
+		}
+		return std::make_unique<weEngineModel>(device, vertices);
+	}
 
 
 }

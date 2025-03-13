@@ -15,8 +15,7 @@ using std::make_unique;
 namespace weEngine
 {
 	struct SimplePushConstantData {
-		glm::mat2 transform{ 1.0f };
-		glm::vec2 offset;
+		glm::mat4 transform{ 1.0f };
 		alignas(16) glm::vec3 color;
 	};
 
@@ -76,18 +75,24 @@ namespace weEngine
 			"shaders\\simpleFragmentShader.frag.spv",
 			pipelineConfig);
 	}
-
-	void SimpleRenderingSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<weEngineGameObject>& gameObjects)
+	/*
+	* Renders the game objects
+	*/
+	void SimpleRenderingSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<weEngineGameObject>& gameObjects, const weEngineCamera& camera)
 	{
 		weEnginePipeline->bind(commandBuffer);
 
+		auto projectionView = camera.getProjection() * camera.getView();
+
 		for (auto& gameObj : gameObjects)
 		{
-			gameObj.transform2d.rotation = glm::mod(gameObj.transform2d.rotation + 0.01f, glm::two_pi<float>());
+			//Rotating the object on the y axis
+			gameObj.transformComp.rotation.y = glm::mod(gameObj.transformComp.rotation.y + 0.01f, glm::two_pi<float>());
+			gameObj.transformComp.rotation.x = glm::mod(gameObj.transformComp.rotation.x + 0.005f, glm::two_pi<float>());
+			
 			SimplePushConstantData pushData{};
-			pushData.offset = gameObj.transform2d.translation;
 			pushData.color = gameObj.color;
-			pushData.transform = gameObj.transform2d.mat2();
+			pushData.transform = projectionView * gameObj.transformComp.mat4();
 
 			vkCmdPushConstants(commandBuffer,
 				pipelineLayout,
