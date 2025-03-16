@@ -86,10 +86,7 @@ namespace weEngine
 
 		for (auto& gameObj : gameObjects)
 		{
-			//Rotating the object on the y axis
-			gameObj.transformComp.rotation.y = glm::mod(gameObj.transformComp.rotation.y + 0.01f, glm::two_pi<float>());
-			gameObj.transformComp.rotation.x = glm::mod(gameObj.transformComp.rotation.x + 0.005f, glm::two_pi<float>());
-			
+
 			SimplePushConstantData pushData{};
 			pushData.color = gameObj.color;
 			pushData.transform = projectionView * gameObj.transformComp.mat4();

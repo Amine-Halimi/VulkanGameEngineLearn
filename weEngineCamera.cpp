@@ -1,7 +1,4 @@
-
-
 #include "weEngineCamera.hpp"
-
 
 //std
 #include "cassert"

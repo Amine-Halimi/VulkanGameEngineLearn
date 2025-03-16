@@ -1,9 +1,12 @@
 #include "ApplicationEngine.hpp"
 #include "SimpleRenderingSystem.hpp"
+#include "keyboardController.hpp"
+#include "mouseController.hpp"
 
 //std
 #include "stdexcept"
 #include "array"
+#include "chrono"
 
 //glm
 #define GLM_FORCE_RADIANS
@@ -35,16 +38,29 @@ namespace weEngine
 		SimpleRenderingSystem renderSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass() };
 		weEngineCamera camera{};
 		
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
+		auto cameraObject = weEngineGameObject::createGameObject();
+		KeyboardMovementController cameraController{};
+		MouseMovementController mouseController{};
+
 		while (!weEngineWindow.shouldClose())
 		{
 			glfwPollEvents();
+
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
+
 			float screenAspectRatio = weEngineRenderer.getAspectRatio();
 
-			//camera.setViewDirection(glm::vec3{0.0f}, glm::vec3{-0.5f, 0.0f, 1.0f});
-			camera.setViewTarget(glm::vec3{ -1.0f, -2.0f, 2.0f }, gameObjects[0].transformComp.translation);
+			cameraController.moveInPlaceXZ(weEngineWindow.getGLFWwindow(), frameTime, cameraObject);
+			mouseController.processMouseMovement(weEngineWindow.getGLFWwindow(), cameraObject);
+
+
+			camera.setViewYXZ(cameraObject.transformComp.translation, cameraObject.transformComp.rotation);
 			
-			//camera.setOrthographicProjection(-screenAspectRatio, screenAspectRatio, -1, 1, -1, 1);
-			camera.setPerspectiveProjection(glm::radians(50.0f), screenAspectRatio, 0.1f, 10.0f);
+			camera.setPerspectiveProjection(glm::radians(50.0f), screenAspectRatio, 0.1f, 100.0f);
 			if (auto commandBuffer = weEngineRenderer.beginFrame())
 			{
 				weEngineRenderer.beginSwapChainRenderPass(commandBuffer);
@@ -62,76 +78,18 @@ namespace weEngine
 	*/
 	void ApplicationEngine::loadGameObjects()
 	{
-		std::shared_ptr<weEngineModel> weEngineModel = createCubeModel(weEngineDevice, { 0.0f, 0.0f, 0.0f });
+		std::shared_ptr<weEngineModel> weEngineModel = weEngineModel::createModelFromFile(weEngineDevice, "models\\backpack\\backpack.obj");
 
-		auto cube = weEngineGameObject::createGameObject();
+		auto gameObj = weEngineGameObject::createGameObject();
 
-		cube.model = weEngineModel;
-		cube.transformComp.translation = { 0.0f, 0.0f, 2.5f };
-		cube.transformComp.scale = { 0.5f, 0.5f, 0.5f };
+		gameObj.model = weEngineModel;
+		gameObj.transformComp.translation = { 0.0f, 0.0f, 2.5f };
+		gameObj.transformComp.scale = { 1.0f, 1.0f, 1.0f };
 		
-		gameObjects.push_back(std::move(cube));
+		gameObjects.push_back(std::move(gameObj));
 	}
 
 
-	std::unique_ptr<weEngineModel> createCubeModel(weEngineDevice& device, glm::vec3 offset) {
-		std::vector<weEngineModel::Vertex> vertices{
-
-			// left face (white)
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-
-			// right face (yellow)
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-
-			// top face (orange, remember y axis points down)
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-
-			// bottom face (red)
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-
-			// nose face (blue)
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-
-			// tail face (green)
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-
-		};
-		for (auto& v : vertices) 
-		{
-			v.position += offset;
-		}
-		return std::make_unique<weEngineModel>(device, vertices);
-	}
 
 
 }

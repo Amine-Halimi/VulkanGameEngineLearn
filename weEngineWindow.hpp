@@ -23,14 +23,30 @@ namespace weEngine {
 
 		weEngineWindow(const weEngineWindow&) = delete;
 		weEngineWindow& operator=(const weEngineWindow&) = delete;
-		bool shouldClose() {
+		bool shouldClose() 
+		{
 			return glfwWindowShouldClose(window);
-		};
-		VkExtent2D getExtent() { return { static_cast<uint32_t>(widthWindow), static_cast<uint32_t>(heightWindow) }; };
-		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
-		bool wasWindowResized() { return framebufferResized; };
-		void resetWindowResizedFlags() { framebufferResized = false; };
+		}
 
+		VkExtent2D getExtent() 
+		{ 
+			return { static_cast<uint32_t>(widthWindow), static_cast<uint32_t>(heightWindow) };
+		}
+
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+		bool wasWindowResized() 
+		{
+			return framebufferResized;
+		}
+		void resetWindowResizedFlags() 
+		{ 
+			framebufferResized = false;
+		}
+
+		GLFWwindow* getGLFWwindow() const
+		{
+			return window;
+		}
 
 	private:
 		static void framebufferResizedCallback(GLFWwindow* window, int width, int height);
