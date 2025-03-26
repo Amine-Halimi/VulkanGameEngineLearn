@@ -196,16 +196,11 @@ namespace weEngine
 
 	std::vector<VkVertexInputAttributeDescription> weEngineModel::Vertex::getAttributeDescriptions()
 	{
-		std::vector<VkVertexInputAttributeDescription> attributeDescription(2);
-		attributeDescription[0].binding = 0;
-		attributeDescription[0].location = 0;
-		attributeDescription[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescription[0].offset = offsetof(Vertex, position);
-
-		attributeDescription[1].binding = 0;
-		attributeDescription[1].location = 1;
-		attributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescription[1].offset = offsetof(Vertex, color);
+		std::vector<VkVertexInputAttributeDescription> attributeDescription{};
+		attributeDescription.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
+		attributeDescription.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
+		attributeDescription.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
+		attributeDescription.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
 
 		return attributeDescription;
 	}
@@ -243,20 +238,13 @@ namespace weEngine
 						attrib.vertices[3 * index.vertex_index + 1], //y component
 						attrib.vertices[3 * index.vertex_index + 2], //z component
 					};
-					auto colorIndex = 3 * index.vertex_index + 2;
-					if (colorIndex < attrib.colors.size())
+					
+					vertex.color =
 					{
-						vertex.color =
-						{
-							attrib.colors[colorIndex - 2], //x component
-							attrib.colors[colorIndex - 1], //y component
-							attrib.colors[colorIndex - 0], //z component
-						};
-					}
-					else
-					{
-						vertex.color = { 1.0f, 1.0f, 1.0f }; //default color
-					}
+						attrib.colors[3 * index.vertex_index + 0], //x component
+						attrib.colors[3 * index.vertex_index + 1], //y component
+						attrib.colors[3 * index.vertex_index + 2], //z component
+					};
 				}
 
 				if (index.normal_index >= 0)

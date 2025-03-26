@@ -21,10 +21,13 @@ namespace weEngine
 			int lookRight= GLFW_KEY_RIGHT;
 			int lookUp = GLFW_KEY_UP;
 			int lookDown = GLFW_KEY_DOWN;
+
+			int escapeKey = GLFW_KEY_ESCAPE;
 		};
 
 
 		void moveInPlaceXZ(GLFWwindow* window, float dt, weEngineGameObject& gameObj);
+		void menuKeys(GLFWwindow* window, float dt, weEngineGameObject& gameObj);
 
 		KeyMappings keys{};
 		float movementSpeed{ 3.0f };

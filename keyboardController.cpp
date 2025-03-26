@@ -66,5 +66,19 @@ namespace weEngine
 		//Ensuring that the moveDir vector is nonzero
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 			gameObj.transformComp.translation += turnSpeed * dt * glm::normalize(moveDir);
+
+
+		menuKeys(window, dt, gameObj);
+	}
+	/*
+	* Planning to expand this function later!
+	* 
+	*/
+	void KeyboardMovementController::menuKeys(GLFWwindow* window, float dt, weEngineGameObject& gameObj)
+	{
+		if (glfwGetKey(window, keys.escapeKey) == GLFW_PRESS)
+		{
+			glfwSetWindowShouldClose(window, true);
+		}
 	}
 }

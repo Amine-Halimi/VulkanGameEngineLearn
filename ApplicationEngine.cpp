@@ -78,15 +78,26 @@ namespace weEngine
 	*/
 	void ApplicationEngine::loadGameObjects()
 	{
-		std::shared_ptr<weEngineModel> weEngineModel = weEngineModel::createModelFromFile(weEngineDevice, "models\\backpack\\backpack.obj");
+		gameObjects.reserve(2);
+		std::shared_ptr<weEngineModel> weEngineModel = weEngineModel::createModelFromFile(weEngineDevice, "models\\colored_cube.obj");
 
 		auto gameObj = weEngineGameObject::createGameObject();
 
 		gameObj.model = weEngineModel;
-		gameObj.transformComp.translation = { 0.0f, 0.0f, 2.5f };
-		gameObj.transformComp.scale = { 1.0f, 1.0f, 1.0f };
-		
+		gameObj.transformComp.translation = { 0.0f, 0.0f, 5.0f };
+		gameObj.transformComp.scale = { 0.5f, 0.5f, 0.5f };
+
 		gameObjects.push_back(std::move(gameObj));
+
+		std::shared_ptr<weEngine::weEngineModel> model = weEngineModel::createModelFromFile(weEngineDevice, "models\\flat_vase.obj");
+
+		auto gameObj2 = weEngineGameObject::createGameObject();
+
+		gameObj2.model = model;
+		gameObj2.transformComp.translation = { 0.0f, 0.0f, 2.5f };
+		gameObj2.transformComp.scale = { 1.2f, 1.2f, 1.2f };
+		
+		gameObjects.push_back(std::move(gameObj2));
 	}
 
 

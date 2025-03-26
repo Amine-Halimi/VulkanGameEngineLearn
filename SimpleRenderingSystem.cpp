@@ -16,7 +16,7 @@ namespace weEngine
 {
 	struct SimplePushConstantData {
 		glm::mat4 transform{ 1.0f };
-		alignas(16) glm::vec3 color;
+		glm::mat4 modelMatrix{ 1.0f };
 	};
 
 	SimpleRenderingSystem::SimpleRenderingSystem(weEngine::weEngineDevice& device, VkRenderPass renderPass): weEngineDevice(device)
@@ -34,7 +34,6 @@ namespace weEngine
 	/*
 	* Creates a pipeline layout for the weEnginePipeline object
 	*/
-
 	void SimpleRenderingSystem::createPipelineLayout()
 	{
 		VkPushConstantRange pushConstantRange{};
@@ -86,11 +85,10 @@ namespace weEngine
 
 		for (auto& gameObj : gameObjects)
 		{
-
+			glm::mat4 modelMatrix = gameObj.transformComp.mat4();
 			SimplePushConstantData pushData{};
-			pushData.color = gameObj.color;
 			pushData.transform = projectionView * gameObj.transformComp.mat4();
-
+			pushData.modelMatrix = modelMatrix;
 			vkCmdPushConstants(commandBuffer,
 				pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
