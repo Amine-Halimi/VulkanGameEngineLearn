@@ -2,6 +2,8 @@
 #include "SimpleRenderingSystem.hpp"
 #include "keyboardController.hpp"
 #include "mouseController.hpp"
+#include "weEngineBuffer.hpp"
+#include "weEngineFrameInfo.hpp"
 
 //std
 #include "stdexcept"
@@ -18,7 +20,11 @@ using std::make_unique;
 
 namespace weEngine
 {
-
+	struct GlobalUbo
+	{
+		glm::mat4 projectionView{ 1.0f };
+		glm::vec3 lightDirection = glm::normalize( glm::vec3{1.0f, -3.0f, -1.0f} );
+	};
 	std::unique_ptr<weEngineModel> createCubeModel(weEngineDevice& device, glm::vec3 offset);
 
 	ApplicationEngine::ApplicationEngine()
@@ -35,6 +41,20 @@ namespace weEngine
 	*/
 	void ApplicationEngine::run()
 	{
+		std::array<std::unique_ptr<weEngineBuffer>, weEngineSwapChain::MAX_FRAMES_IN_FLIGHT> uboBuffers{};
+		for (int i = 0; i < uboBuffers.size(); i++)
+		{
+			uboBuffers[i] = std::make_unique<weEngineBuffer>(
+				weEngineDevice,
+				sizeof(GlobalUbo),
+				1, //Synchronize assigning the UBO with each of the frame
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+				//weEngineDevice.properties.limits.minUniformBufferOffsetAlignment
+			);
+			uboBuffers[i]->map();
+		}
+
 		SimpleRenderingSystem renderSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass() };
 		weEngineCamera camera{};
 		
@@ -63,8 +83,25 @@ namespace weEngine
 			camera.setPerspectiveProjection(glm::radians(50.0f), screenAspectRatio, 0.1f, 100.0f);
 			if (auto commandBuffer = weEngineRenderer.beginFrame())
 			{
+				int frameIndex = weEngineRenderer.getCurrentFrameIndex();
+
+				FrameInfo frameInfo
+				{
+					frameIndex,
+					frameTime,
+					commandBuffer,
+					camera
+				};
+
+				//Update
+				GlobalUbo ubo{};
+				ubo.projectionView = camera.getProjection() * camera.getView();
+				uboBuffers[frameIndex]->writeToBuffer(&ubo);
+				uboBuffers[frameIndex]->flush();
+
+				//Render
 				weEngineRenderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+				renderSystem.renderGameObjects(frameInfo, gameObjects);
 				weEngineRenderer.endSwapChainRenderPass(commandBuffer);
 				weEngineRenderer.endFrame();
 			}

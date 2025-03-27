@@ -77,26 +77,26 @@ namespace weEngine
 	/*
 	* Renders the game objects
 	*/
-	void SimpleRenderingSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<weEngineGameObject>& gameObjects, const weEngineCamera& camera)
+	void SimpleRenderingSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<weEngineGameObject>& gameObjects)
 	{
-		weEnginePipeline->bind(commandBuffer);
+		weEnginePipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = camera.getProjection() * camera.getView();
+		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
 		for (auto& gameObj : gameObjects)
 		{
 			SimplePushConstantData pushData{};
 			pushData.transform = projectionView * gameObj.transformComp.mat4();
 			pushData.normalMatrix = gameObj.transformComp.normalMatrix();
-			vkCmdPushConstants(commandBuffer,
+			vkCmdPushConstants(frameInfo.commandBuffer,
 				pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(SimplePushConstantData),
 				&pushData);
 
-			gameObj.model->bind(commandBuffer);
-			gameObj.model->draw(commandBuffer);
+			gameObj.model->bind(frameInfo.commandBuffer);
+			gameObj.model->draw(frameInfo.commandBuffer);
 
 		}
 

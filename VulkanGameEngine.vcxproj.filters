@@ -101,6 +101,9 @@
     <ClInclude Include="weEngineBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="weEngineFrameInfo.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CompileShader.bat">
