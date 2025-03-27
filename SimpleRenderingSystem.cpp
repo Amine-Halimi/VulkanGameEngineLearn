@@ -16,7 +16,7 @@ namespace weEngine
 {
 	struct SimplePushConstantData {
 		glm::mat4 transform{ 1.0f };
-		glm::mat4 modelMatrix{ 1.0f };
+		glm::mat4 normalMatrix{ 1.0f };
 	};
 
 	SimpleRenderingSystem::SimpleRenderingSystem(weEngine::weEngineDevice& device, VkRenderPass renderPass): weEngineDevice(device)
@@ -85,10 +85,9 @@ namespace weEngine
 
 		for (auto& gameObj : gameObjects)
 		{
-			glm::mat4 modelMatrix = gameObj.transformComp.mat4();
 			SimplePushConstantData pushData{};
 			pushData.transform = projectionView * gameObj.transformComp.mat4();
-			pushData.modelMatrix = modelMatrix;
+			pushData.normalMatrix = gameObj.transformComp.normalMatrix();
 			vkCmdPushConstants(commandBuffer,
 				pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,

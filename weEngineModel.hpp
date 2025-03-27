@@ -6,7 +6,7 @@
 */
 
 #include "weEngineDevice.hpp"
-
+#include "weEngineBuffer.hpp"
 //glm
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -64,13 +64,11 @@ namespace weEngine
 
 		weEngineDevice& weEngineDevice;
 
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
+		std::unique_ptr<weEngineBuffer> vertexBuffer;
 		uint32_t vertexCount;
 
 		bool hasIndices = false;
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
+		std::unique_ptr<weEngineBuffer> indexBuffer;
 		uint32_t indexCount;
 	};
 }
