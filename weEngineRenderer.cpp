@@ -184,8 +184,8 @@ namespace weEngine
 		VkViewport viewport{};
 		viewport.x = 0;
 		viewport.y = 0;
-		viewport.width = static_cast<uint32_t>(weEngineSwapChain->getSwapChainExtent().width);
-		viewport.height = static_cast<uint32_t>(weEngineSwapChain->getSwapChainExtent().height);
+		viewport.width = static_cast<float>(weEngineSwapChain->getSwapChainExtent().width); //Warning of conv
+		viewport.height = static_cast<float>(weEngineSwapChain->getSwapChainExtent().height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		VkRect2D scissor = { {0, 0}, weEngineSwapChain->getSwapChainExtent() };

@@ -10,7 +10,7 @@
 //std
 #include "memory"
 #include "vector"
-
+#include "unordered_map"
 /*
 *
 * ApplicationEngine is a class for running the vulkan instance.
@@ -41,6 +41,6 @@ namespace weEngine {
 
 		//Declaration order matters
 		std::unique_ptr<weEngineDescriptorPool> globalPool{};
-		std::vector<weEngineGameObject> gameObjects;
+		weEngineGameObject::Map gameObjects;
 	};
 }

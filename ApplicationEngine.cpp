@@ -23,7 +23,10 @@ namespace weEngine
 	struct GlobalUbo
 	{
 		glm::mat4 projectionView{ 1.0f };
-		glm::vec3 lightDirection = glm::normalize( glm::vec3{1.0f, -3.0f, -1.0f} );
+		//glm::vec3 lightDirection = glm::normalize( glm::vec3{1.0f, -3.0f, -1.0f} );
+		glm::vec4 ambientColorLight{ 1.f, 1.f, 1.f, .02f };
+		glm::vec3 lightPosition{-1.0f};
+		alignas(16) glm::vec4 lightColor{ 1.0f }; //w is the light intensity
 	};
 	std::unique_ptr<weEngineModel> createCubeModel(weEngineDevice& device, glm::vec3 offset);
 
@@ -59,9 +62,9 @@ namespace weEngine
 			uboBuffers[i]->map();
 		}
 
-		//Create a descriptor set
+		//Create a descriptor set layout
 		auto globalSetLayout = weEngineDescriptorSetLayout::Builder(weEngineDevice)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(weEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -80,6 +83,7 @@ namespace weEngine
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		auto cameraObject = weEngineGameObject::createGameObject();
+		cameraObject.transformComp.translation.z = -2.5f;
 		KeyboardMovementController cameraController{};
 		MouseMovementController mouseController{};
 
@@ -110,7 +114,8 @@ namespace weEngine
 					frameTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex]
+					globalDescriptorSets[frameIndex],
+					gameObjects
 				};
 
 				//Update
@@ -121,7 +126,7 @@ namespace weEngine
 
 				//Render
 				weEngineRenderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.renderGameObjects(frameInfo, gameObjects);
+				renderSystem.renderGameObjects(frameInfo);
 				weEngineRenderer.endSwapChainRenderPass(commandBuffer);
 				weEngineRenderer.endFrame();
 			}
@@ -135,26 +140,36 @@ namespace weEngine
 	*/
 	void ApplicationEngine::loadGameObjects()
 	{
-		gameObjects.reserve(2);
-		std::shared_ptr<weEngineModel> weEngineModel = weEngineModel::createModelFromFile(weEngineDevice, "models\\colored_cube.obj");
+		gameObjects.reserve(3);
+		std::shared_ptr<weEngineModel> coloredCubeModel = weEngineModel::createModelFromFile(weEngineDevice, "models\\colored_cube.obj");
 
-		auto gameObj = weEngineGameObject::createGameObject();
+		auto coloredCube = weEngineGameObject::createGameObject();
 
-		gameObj.model = weEngineModel;
-		gameObj.transformComp.translation = { 0.0f, 0.0f, 5.0f };
-		gameObj.transformComp.scale = { 0.5f, 0.5f, 0.5f };
+		coloredCube.model = coloredCubeModel;
+		coloredCube.transformComp.translation = { 0.0f, -0.05f, 1.5f };
+		coloredCube.transformComp.scale = { 0.5f, 0.5f, 0.5f };
 
-		gameObjects.push_back(std::move(gameObj));
+		gameObjects.emplace(coloredCube.getId(), std::move(coloredCube));
 
-		std::shared_ptr<weEngine::weEngineModel> model = weEngineModel::createModelFromFile(weEngineDevice, "models\\flat_vase.obj");
+		std::shared_ptr<weEngine::weEngineModel> vaseModel = weEngineModel::createModelFromFile(weEngineDevice, "models\\flat_vase.obj");
 
-		auto gameObj2 = weEngineGameObject::createGameObject();
+		auto flatVase = weEngineGameObject::createGameObject();
 
-		gameObj2.model = model;
-		gameObj2.transformComp.translation = { 0.0f, 0.0f, 2.5f };
-		gameObj2.transformComp.scale = { 1.2f, 1.2f, 1.2f };
+		flatVase.model = vaseModel;
+		flatVase.transformComp.translation = { 0.0f, 0.0f, 0.5f };
+		flatVase.transformComp.scale = { 1.2f, 1.2f, 1.2f };
 		
-		gameObjects.push_back(std::move(gameObj2));
+		gameObjects.emplace(flatVase.getId(), std::move(flatVase));
+
+		std::shared_ptr<weEngine::weEngineModel> quad = weEngineModel::createModelFromFile(weEngineDevice, "models\\floor.obj");
+
+		auto gameObjFloor = weEngineGameObject::createGameObject();
+
+		gameObjFloor.model = quad;
+		gameObjFloor.transformComp.translation = { 0.0f, 0.5f, 0.0f };
+		gameObjFloor.transformComp.scale = { 3.f, 1.f, 3.f };
+
+		gameObjects.emplace(gameObjFloor.getId(), std::move(gameObjFloor));
 	}
 
 

@@ -1,5 +1,10 @@
 #include "weEngineDescriptors.hpp"
-
+/*
+* Implementation file for the descriptors classes
+* author: Brendan Galea
+* 
+* Found at: https://pastebin.com/hZ6ax53w
+*/
 // std
 #include <cassert>
 #include <stdexcept>
@@ -36,7 +41,7 @@ namespace weEngine {
         : weEngineDevice{ weEngineDevice }, bindings{ bindings } 
     {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-        for (auto kv : bindings) {
+        for (auto& kv : bindings) {
             setLayoutBindings.push_back(kv.second);
         }
 

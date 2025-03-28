@@ -18,6 +18,7 @@
 
 //std
 #include "memory"
+#include "unordered_map"
 namespace weEngine
 {
 	struct TransformComponent
@@ -38,7 +39,7 @@ namespace weEngine
 	{
 	public:
 		using id_t = unsigned int;
-
+		using Map = std::unordered_map<id_t, weEngineGameObject>;
 		//Static function creating a game object
 		static weEngineGameObject createGameObject()
 		{

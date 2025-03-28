@@ -27,7 +27,7 @@ namespace weEngine {
 		SimpleRenderingSystem(const SimpleRenderingSystem&) = delete;
 		SimpleRenderingSystem& operator=(const SimpleRenderingSystem&) = delete;
 
-		void renderGameObjects(FrameInfo& frameInfo, std::vector<weEngineGameObject>& gameObjects);
+		void renderGameObjects(FrameInfo& frameInfo);
 
 	private:
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);

@@ -78,7 +78,7 @@ namespace weEngine
 	/*
 	* Renders the game objects
 	*/
-	void SimpleRenderingSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<weEngineGameObject>& gameObjects)
+	void SimpleRenderingSystem::renderGameObjects(FrameInfo& frameInfo)
 	{
 		weEnginePipeline->bind(frameInfo.commandBuffer);
 
@@ -94,8 +94,9 @@ namespace weEngine
 			nullptr);
 
 
-		for (auto& gameObj : gameObjects)
+		for (auto& kv : frameInfo.gameObjects)
 		{
+			auto& gameObj = kv.second;
 			SimplePushConstantData pushData{};
 			pushData.modelMatrix = gameObj.transformComp.mat4();
 			pushData.normalMatrix = gameObj.transformComp.normalMatrix();

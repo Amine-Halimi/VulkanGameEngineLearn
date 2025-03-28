@@ -1,7 +1,10 @@
 #pragma once
 
+//weEngine
 #include "weEngineCamera.hpp"
+#include "weEngineGameObject.hpp"
 
+//Vulkan
 #include "vulkan/vulkan.h"
 
 namespace weEngine
@@ -13,5 +16,6 @@ namespace weEngine
 		VkCommandBuffer commandBuffer;
 		weEngineCamera& camera;
 		VkDescriptorSet globalDescriptorSet;
+		weEngineGameObject::Map& gameObjects;
 	};
 }
