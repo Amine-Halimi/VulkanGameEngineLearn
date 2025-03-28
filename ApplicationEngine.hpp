@@ -5,6 +5,7 @@
 #include "weEngineDevice.hpp"
 #include "weEngineRenderer.hpp"
 #include "weEngineCamera.hpp"
+#include "weEngineDescriptors.hpp"
 
 //std
 #include "memory"
@@ -37,6 +38,9 @@ namespace weEngine {
 		weEngineWindow weEngineWindow{ WIDTH, HEIGHT, "Hello from Vulkan" };
 		weEngineDevice weEngineDevice{ weEngineWindow };
 		weEngineRenderer weEngineRenderer{weEngineWindow, weEngineDevice};
+
+		//Declaration order matters
+		std::unique_ptr<weEngineDescriptorPool> globalPool{};
 		std::vector<weEngineGameObject> gameObjects;
 	};
 }

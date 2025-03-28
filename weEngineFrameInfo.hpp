@@ -12,5 +12,6 @@ namespace weEngine
 		float frameTime;
 		VkCommandBuffer commandBuffer;
 		weEngineCamera& camera;
+		VkDescriptorSet globalDescriptorSet;
 	};
 }

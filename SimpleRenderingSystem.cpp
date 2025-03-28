@@ -15,13 +15,13 @@ using std::make_unique;
 namespace weEngine
 {
 	struct SimplePushConstantData {
-		glm::mat4 transform{ 1.0f };
+		glm::mat4 modelMatrix{ 1.0f };
 		glm::mat4 normalMatrix{ 1.0f };
 	};
 
-	SimpleRenderingSystem::SimpleRenderingSystem(weEngine::weEngineDevice& device, VkRenderPass renderPass): weEngineDevice(device)
+	SimpleRenderingSystem::SimpleRenderingSystem(weEngine::weEngineDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout): weEngineDevice(device)
 	{
-		createPipelineLayout();
+		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
@@ -34,18 +34,19 @@ namespace weEngine
 	/*
 	* Creates a pipeline layout for the weEnginePipeline object
 	*/
-	void SimpleRenderingSystem::createPipelineLayout()
+	void SimpleRenderingSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; //Set the push constant range for the vertex and fragment stage.
 		pushConstantRange.size = sizeof(SimplePushConstantData);
 		pushConstantRange.offset = 0; //offset if we need to separate the data for vertex and fragment stages
 
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0; // Empty layout
-		pipelineLayoutInfo.pSetLayouts = nullptr;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size()); // Empty layout
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1; // Preliminary data sent to the shader
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
@@ -81,12 +82,22 @@ namespace weEngine
 	{
 		weEnginePipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
+		
+		vkCmdBindDescriptorSets(
+			frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0,
+			1,
+			&frameInfo.globalDescriptorSet,
+			0,
+			nullptr);
+
 
 		for (auto& gameObj : gameObjects)
 		{
 			SimplePushConstantData pushData{};
-			pushData.transform = projectionView * gameObj.transformComp.mat4();
+			pushData.modelMatrix = gameObj.transformComp.mat4();
 			pushData.normalMatrix = gameObj.transformComp.normalMatrix();
 			vkCmdPushConstants(frameInfo.commandBuffer,
 				pipelineLayout,

@@ -21,7 +21,7 @@ namespace weEngine {
 	class SimpleRenderingSystem
 	{
 	public:
-		SimpleRenderingSystem(weEngineDevice& device, VkRenderPass renderPass);
+		SimpleRenderingSystem(weEngineDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderingSystem();
 
 		SimpleRenderingSystem(const SimpleRenderingSystem&) = delete;
@@ -30,7 +30,7 @@ namespace weEngine {
 		void renderGameObjects(FrameInfo& frameInfo, std::vector<weEngineGameObject>& gameObjects);
 
 	private:
-		void createPipelineLayout();
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 		
 		weEngineDevice& weEngineDevice;

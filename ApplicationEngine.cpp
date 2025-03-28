@@ -29,6 +29,10 @@ namespace weEngine
 
 	ApplicationEngine::ApplicationEngine()
 	{
+		globalPool = weEngineDescriptorPool::Builder(weEngineDevice)
+			.setMaxSets(weEngineSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, weEngineSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
 		loadGameObjects();
 	}
 
@@ -55,7 +59,22 @@ namespace weEngine
 			uboBuffers[i]->map();
 		}
 
-		SimpleRenderingSystem renderSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass() };
+		//Create a descriptor set
+		auto globalSetLayout = weEngineDescriptorSetLayout::Builder(weEngineDevice)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.build();
+
+		std::vector<VkDescriptorSet> globalDescriptorSets(weEngineSwapChain::MAX_FRAMES_IN_FLIGHT);
+
+		for (int i = 0; i < globalDescriptorSets.size(); i++)
+		{
+			auto bufferInfo = uboBuffers[i]->descriptorInfo();
+			weEngineDescriptorWriter(*globalSetLayout, *globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(globalDescriptorSets[i]);
+		}
+
+		SimpleRenderingSystem renderSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		weEngineCamera camera{};
 		
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -90,7 +109,8 @@ namespace weEngine
 					frameIndex,
 					frameTime,
 					commandBuffer,
-					camera
+					camera,
+					globalDescriptorSets[frameIndex]
 				};
 
 				//Update
