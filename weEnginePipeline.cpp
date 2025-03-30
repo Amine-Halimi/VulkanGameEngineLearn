@@ -101,8 +101,8 @@ namespace weEngine
 		shaderStages[1].pSpecializationInfo = nullptr;
 
 
-		auto bindingDescriptions = weEngineModel::Vertex::getBindingDescriptions();
-		auto attributeDescriptions = weEngineModel::Vertex::getAttributeDescriptions();
+		auto& bindingDescriptions = configInfo.bindingDescriptions;
+		auto& attributeDescriptions = configInfo.attributeDescriptions;
 		
 		//Tells vulkan how to read the vertex input buffer
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
@@ -235,6 +235,9 @@ namespace weEngine
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
+		//Default value for 
+		configInfo.bindingDescriptions = weEngineModel::Vertex::getBindingDescriptions();
+		configInfo.attributeDescriptions = weEngineModel::Vertex::getAttributeDescriptions();
 	}
 
 	//Binds the command buffer to the pipeline

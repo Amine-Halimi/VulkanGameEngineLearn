@@ -60,6 +60,9 @@
     <ClCompile Include="weEngineDescriptors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pointlightSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="weEngineWindow.hpp">
@@ -110,6 +113,9 @@
     <ClInclude Include="weEngineDescriptors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pointlightSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CompileShader.bat">
@@ -117,5 +123,7 @@
     </None>
     <None Include="shaders\simpleFragmentShader.frag" />
     <None Include="shaders\simpleVertexShader.vert" />
+    <None Include="shaders\pointLightFragmentShader.frag" />
+    <None Include="shaders\pointLightVertexShader.vert" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@
 #include "mouseController.hpp"
 #include "weEngineBuffer.hpp"
 #include "weEngineFrameInfo.hpp"
+#include "pointlightSystem.hpp"
 
 //std
 #include "stdexcept"
@@ -22,7 +23,8 @@ namespace weEngine
 {
 	struct GlobalUbo
 	{
-		glm::mat4 projectionView{ 1.0f };
+		glm::mat4 projection{ 1.0f };
+		glm::mat4 view{ 1.0f };
 		//glm::vec3 lightDirection = glm::normalize( glm::vec3{1.0f, -3.0f, -1.0f} );
 		glm::vec4 ambientColorLight{ 1.f, 1.f, 1.f, .02f };
 		glm::vec3 lightPosition{-1.0f};
@@ -44,7 +46,7 @@ namespace weEngine
 	}
 
 	/*
-	* Main loop of the applcation engine
+	* Main loop of the application engine
 	*/
 	void ApplicationEngine::run()
 	{
@@ -78,6 +80,8 @@ namespace weEngine
 		}
 
 		SimpleRenderingSystem renderSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+		PointLightSystem pointLightSystem{ weEngineDevice, weEngineRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+
 		weEngineCamera camera{};
 		
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -120,13 +124,15 @@ namespace weEngine
 
 				//Update
 				GlobalUbo ubo{};
-				ubo.projectionView = camera.getProjection() * camera.getView();
+				ubo.projection = camera.getProjection();
+				ubo.view = camera.getView();
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
 				//Render
 				weEngineRenderer.beginSwapChainRenderPass(commandBuffer);
 				renderSystem.renderGameObjects(frameInfo);
+				pointLightSystem.render(frameInfo);
 				weEngineRenderer.endSwapChainRenderPass(commandBuffer);
 				weEngineRenderer.endFrame();
 			}
