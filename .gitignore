@@ -364,5 +364,8 @@ FodyWeavers.xsd
 
 # spv files
 .spv
-/shaders/simpleFragmentShader.frag
 /shaders/simpleFragmentShader.frag.spv
+/shaders/pointLightFragmentShader.frag.spv
+/shaders/pointLightVertexShader.vert.spv
+/shaders/simpleVertexShader.vert.spv
+/a.spv
